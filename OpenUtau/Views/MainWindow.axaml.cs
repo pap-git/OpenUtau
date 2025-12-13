@@ -1405,6 +1405,7 @@ namespace OpenUtau.App.Views {
                 if (!DocManager.Inst.ChangesSaved && !await AskForNewSave()) {
                     return;
                 }
+                OpenUtau.Core.Format.Ustx.autosaveFailed = 0;
             }
         }
 
