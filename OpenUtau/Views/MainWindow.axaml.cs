@@ -40,6 +40,7 @@ namespace OpenUtau.App.Views {
         private PartEditState? partEditState;
         private readonly DispatcherTimer timer;
         private readonly DispatcherTimer autosaveTimer;
+        private readonly DispatcherTimer autosaveCheckTimer;
         private bool forceClose;
 
         private bool shouldOpenPartsContextMenu;
@@ -76,6 +77,12 @@ namespace OpenUtau.App.Views {
                 DispatcherPriority.Normal,
                 (sender, args) => DocManager.Inst.AutoSave());
             autosaveTimer.Start();
+
+            autosaveCheckTimer = new DispatcherTimer(
+                TimeSpan.FromSeconds(30),
+                DispatcherPriority.Normal,
+                (sender, args) => OnNoSavesAndFailedAttempt());
+            autosaveCheckTimer.Start();
 
             PartRenameCommand = ReactiveCommand.Create<UPart>(part => RenamePart(part));
             PartGotoFileCommand = ReactiveCommand.Create<UPart>(part => GotoFile(part));
@@ -1390,6 +1397,17 @@ namespace OpenUtau.App.Views {
             }
         }
 
+        public async void OnNoSavesAndFailedAttempt() {
+            Log.Information("Autosave checker called");
+            Log.Information("Autosave Failed: " + OpenUtau.Core.Format.Ustx.autosaveFailed);
+            Log.Information("Autosave Failed amari: " + (OpenUtau.Core.Format.Ustx.autosaveFailed % 5));
+            if (!DocManager.Inst.ChangesSaved && OpenUtau.Core.Format.Ustx.autosaveFailed % 5 == 0 && OpenUtau.Core.Format.Ustx.autosaveFailed != 0) {
+                if (!DocManager.Inst.ChangesSaved && !await AskForNewSave()) {
+                    return;
+                }
+            }
+        }
+
         async void ValidateTracksVoiceColor() {
             DocManager.Inst.StartUndoGroup();
             foreach (var track in DocManager.Inst.Project.tracks) {
@@ -1491,6 +1509,23 @@ namespace OpenUtau.App.Views {
                     goto case MessageBox.MessageBoxResult.No;
                 case MessageBox.MessageBoxResult.No:
                     return true; // Continue.
+                default:
+                    return false; // Cancel.
+            }
+        }
+
+        private async Task<bool> AskForNewSave() {
+            var result = await MessageBox.Show(
+                this,
+                ThemeManager.GetString("dialogs.failedautosave.message"),
+                ThemeManager.GetString("dialogs.failedautosave.caption"),
+                MessageBox.MessageBoxButtons.YesNo);
+            switch (result) {
+                case MessageBox.MessageBoxResult.Yes:
+                    await Save();
+                    goto case MessageBox.MessageBoxResult.No;
+                case MessageBox.MessageBoxResult.No:
+                    return false;
                 default:
                     return false; // Cancel.
             }

@@ -33,6 +33,8 @@
   <system:String x:Key="dialogs.about.message">
 OpenUtau aims to be an open source editing environment for UTAU community, with a modern user experience and intelligent phonological support. Visit us on Github.</system:String>
   <system:String x:Key="dialogs.exitsave.caption">Exit OpenUtau</system:String>
+  <system:String x:Key="dialogs.failedautosave.message">The current project is not being saved and failed to autosave 5 times. Do you want to save it? No you should do it You won't regret</system:String>
+  <system:String x:Key="dialogs.failedautosave.caption">Failed to autosave</system:String>
   <system:String x:Key="dialogs.exitsave.message">The current project contains unsaved changes. Do you want to save it?</system:String>
   <system:String x:Key="dialogs.export.caption">Export</system:String>
   <system:String x:Key="dialogs.export.savefirst">Save project file first</system:String>
@@ -508,6 +510,8 @@ Warning: this option removes custom presets.</system:String>
   <system:String x:Key="prefs.rendering.threads.numthreads">Maximum Render Threads</system:String>
   <system:String x:Key="prefs.rendering.wavtool">Wavtool</system:String>
   <system:String x:Key="prefs.utau">UTAU</system:String>
+  <system:String x:Key="prefs.forksettings">Fork Settings</system:String>
+  <system:String x:Key="prefs.forksettings.autosave">Change Autosave name to project-date-autosave.ustx</system:String>
 
   <system:String x:Key="progress.cachecleared">Cache cleared.</system:String>
   <system:String x:Key="progress.clearingcache">Clearing cache...</system:String>

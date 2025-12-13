@@ -19,6 +19,7 @@ namespace OpenUtau.App.Views {
                 LogoTypeLight.IsVisible = true;
                 LogoTypeDark.IsVisible = false;
             }
+            VersionText.Text = $"Version {System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version}";
             this.Cursor = new Cursor(StandardCursorType.AppStarting);
             this.Opened += SplashWindow_Opened;
         }

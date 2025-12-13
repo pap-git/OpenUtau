@@ -9,6 +9,7 @@ using OpenUtau.Core.Util;
 using Serilog;
 
 namespace OpenUtau.Core.Format {
+
     public class Ustx {
         public static readonly Version kUstxVersion = new Version(0, 9);
 
@@ -34,6 +35,8 @@ namespace OpenUtau.Core.Format {
         public const string SHFC = "shfc";
         public const string TENC = "tenc";
         public const string VOIC = "voic";
+
+        public static int autosaveFailed = 0;
 
         public static readonly string[] required = { DYN, PITD, CLR, ENG, VEL, VOL, ATK, DEC };
 
@@ -121,6 +124,7 @@ namespace OpenUtau.Core.Format {
                 Preferences.Save();
             } catch (Exception ex) {
                 Log.Error(ex, $"Failed to autosave: {filePath}");
+                autosaveFailed++;
             }
         }
 

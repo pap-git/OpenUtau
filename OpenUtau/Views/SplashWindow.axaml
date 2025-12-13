@@ -13,15 +13,15 @@
         SystemDecorations="BorderOnly"
         WindowStartupLocation="CenterScreen">
   <Grid>
-    <Image Margin="20" Width="96" Height="96"
-           VerticalAlignment="Top" HorizontalAlignment="Center"
-           Source="/Assets/open-utau.ico"/>
-    <Image x:Name="LogoTypeDark" Height="16" Margin="0,136,0,10"
-           VerticalAlignment="Top" HorizontalAlignment="Center"
+    <Image x:Name="LogoTypeDark" Height="16" Margin="40,40,0,20"
+           VerticalAlignment="Top" HorizontalAlignment="Left"
            Source="/Assets/logotype-w.png" IsVisible="{Binding IsDarkMode}"/>
-    <Image x:Name="LogoTypeLight" Height="16" Margin="0,136,0,10"
-           VerticalAlignment="Top" HorizontalAlignment="Center"
+    <Image x:Name="LogoTypeLight" Height="16" Margin="40,40,0,20"
+           VerticalAlignment="Top" HorizontalAlignment="Left"
            Source="/Assets/logotype.png" IsVisible="{Binding !IsDarkMode}"/>
+    <TextBlock x:Name="VersionText" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="40,70,0,20" Text="" />
+    <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Margin="40,90,0,20" Text="pap's fork" />
+    <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="40,20,0,20" Opacity=".5" Text="https://github.com/pap-git/OpenUtau/" />
     <ProgressBar VerticalAlignment="Bottom" HorizontalAlignment="Stretch"
            IsIndeterminate="True"/>
   </Grid>

@@ -36,6 +36,8 @@
   </system:String>
   <system:String x:Key="dialogs.exitsave.caption">OpenUtauを終了</system:String>
   <system:String x:Key="dialogs.exitsave.message">保存されていない変更があります。保存しますか？</system:String>
+  <system:String x:Key="dialogs.failedautosave.message">このプロジェクトファイルはオートセーブに5回失敗し、かつ一度も保存されていません。保存しますか？てかしよう</system:String>
+  <system:String x:Key="dialogs.failedautosave.caption">オートセーブに失敗しました</system:String>
   <system:String x:Key="dialogs.export.caption">エクスポート</system:String>
   <system:String x:Key="dialogs.export.savefirst">プロジェクトを保存してください。</system:String>
   <system:String x:Key="dialogs.importtracks.caption">トラックのインポート</system:String>

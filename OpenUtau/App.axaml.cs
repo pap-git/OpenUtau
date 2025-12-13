@@ -87,7 +87,7 @@ namespace OpenUtau.App {
             SetTheme();
             Log.Information("Initialized theme.");
         }
-
+        
         public static void SetTheme() {
             if (Current == null) {
                 return;

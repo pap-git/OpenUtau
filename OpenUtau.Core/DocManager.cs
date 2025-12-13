@@ -137,9 +137,7 @@ namespace OpenUtau.Core {
                 if (untitled) {
                     Directory.CreateDirectory(PathManager.Inst.BackupsPath);
                 }
-                string dir = untitled
-                    ? PathManager.Inst.BackupsPath
-                    : Path.GetDirectoryName(Project.FilePath);
+                string dir = PathManager.Inst.BackupsPath;
                 string filename = untitled
                     ? "Untitled"
                     : Path.GetFileNameWithoutExtension(Project.FilePath);
@@ -172,8 +170,13 @@ namespace OpenUtau.Core {
 
                 var backupdate = DateTime.Now;
                 Log.Information($"e {backupdate}");
-                string backup = Path.Join(dir, filename + backupdate.ToString("-yyyyMMdd-HHmmss") + "-autosave.ustx");
-                Log.Information($"Autosave {backup}.");
+                string backup;
+                if (Preferences.Default.Fork_ChangeAutoSaveName == true) {
+                    backup = Path.Join(dir, filename + backupdate.ToString("-yyyyMMdd-HHmmss") + "-autosave.ustx");
+                } else {
+                    backup = Path.Join(dir, filename + "-autosave.ustx");
+                }
+                    Log.Information($"Autosave {backup}.");
                 Format.Ustx.AutoSave(backup, Project);
                 Log.Information($"Autosaved {backup}.");
                 autosavedPoint = undoQueue.LastOrDefault();

@@ -208,6 +208,7 @@ namespace OpenUtau.Core.Util {
             public bool LockUnselectedNotesVibrato = true;
             public bool LockUnselectedNotesExpressions = true;
             public bool VoicebankPublishUseIgnore = true;
+            public bool Fork_ChangeAutoSaveName = true;
             public string VoicebankPublishIgnores = @"#Adobe Audition
 *.pkf
 

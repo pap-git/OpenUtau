@@ -122,6 +122,8 @@ namespace OpenUtau.App.ViewModels {
         [Reactive] public bool RememberMid { get; set; }
         [Reactive] public bool RememberUst { get; set; }
         [Reactive] public bool RememberVsqx { get; set; }
+
+        [Reactive] public bool Fork_ChangeAutoSaveName { get; set; }
         public string WinePath => Preferences.Default.WinePath;
 
         public PreferencesViewModel() {
@@ -184,6 +186,7 @@ namespace OpenUtau.App.ViewModels {
             RememberMid = Preferences.Default.RememberMid;
             RememberUst = Preferences.Default.RememberUst;
             RememberVsqx = Preferences.Default.RememberVsqx;
+            Fork_ChangeAutoSaveName = Preferences.Default.Fork_ChangeAutoSaveName;
             ClearCacheOnQuit = Preferences.Default.ClearCacheOnQuit;
 
             this.WhenAnyValue(vm => vm.AudioOutputDevice)
@@ -342,6 +345,13 @@ namespace OpenUtau.App.ViewModels {
                     Preferences.Default.RememberVsqx = index;
                     Preferences.Save();
                 });
+            // fork settings start
+            this.WhenAnyValue(vm => vm.Fork_ChangeAutoSaveName)
+                .Subscribe(index => {
+                    Preferences.Default.Fork_ChangeAutoSaveName = index;
+                    Preferences.Save();
+                });
+            // fork settings end
             this.WhenAnyValue(vm => vm.ClearCacheOnQuit)
                 .Subscribe(index => {
                     Preferences.Default.ClearCacheOnQuit = index;

@@ -86,6 +86,7 @@ namespace OpenUtau.Core {
         public string ThemeFilePath => Path.Combine(DataPath, "theme.yaml");
         public string NotePresetsFilePath => Path.Combine(DataPath, "notepresets.json");
         public string BackupsPath => Path.Combine(DataPath, "Backups");
+        public string AutosavePath => Path.Combine(DataPath, "Autosaves");
 
         public List<string> SingersPaths {
             get {
