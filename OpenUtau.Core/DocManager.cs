@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -164,14 +165,14 @@ namespace OpenUtau.Core {
                 if (untitled) {
                     Directory.CreateDirectory(PathManager.Inst.BackupsPath);
                 }
-                string dir = untitled
-                    ? PathManager.Inst.BackupsPath
-                    : Path.GetDirectoryName(Project.FilePath);
+                string dir = PathManager.Inst.BackupsPath;
                 string filename = untitled
                     ? "Untitled"
                     : Path.GetFileNameWithoutExtension(Project.FilePath);
 
-                string backup = Path.Join(dir, filename + "-autosave.ustx");
+                var backupdate = DateTime.Now;
+                Log.Information($"e {backupdate}");
+                string backup = Path.Join(dir, filename + backupdate.ToString("-yyyyMMdd-HHmmss") + "-autosave.ustx");
                 Log.Information($"Autosave {backup}.");
                 Format.Ustx.AutoSave(backup, Project);
                 Log.Information($"Autosaved {backup}.");
