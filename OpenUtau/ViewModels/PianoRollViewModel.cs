@@ -10,6 +10,7 @@ using OpenUtau.Classic;
 using OpenUtau.Core;
 using OpenUtau.Core.Ustx;
 using OpenUtau.Core.Util;
+using OpenUtau.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -45,6 +46,7 @@ namespace OpenUtau.App.ViewModels {
 
         [Reactive] public NotesViewModel NotesViewModel { get; set; }
         [Reactive] public PlaybackViewModel? PlaybackViewModel { get; set; }
+        [Reactive] public CurveViewModel CurveViewModel { get; set; }
 
         public double Width => Preferences.Default.PianorollWindowSize.Width;
         public double Height => Preferences.Default.PianorollWindowSize.Height;
@@ -66,6 +68,14 @@ namespace OpenUtau.App.ViewModels {
         public bool PlaybackAutoScroll1 { get => Preferences.Default.PlaybackAutoScroll == 1 ? true : false; }
         public bool PlaybackAutoScroll2 { get => Preferences.Default.PlaybackAutoScroll == 2 ? true : false; }
         public bool PianoRollDetached { get => Preferences.Default.DetachPianoRoll; }
+        public bool ShowPhonemizerTags {
+            get => Preferences.Default.ShowPhonemizerTags;
+            set {
+                Preferences.Default.ShowPhonemizerTags = value;
+                Preferences.Save();
+                this.RaisePropertyChanged(nameof(ShowPhonemizerTags));
+            }
+        }
 
         public ObservableCollectionExtended<MenuItemViewModel> LegacyPlugins { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
@@ -74,6 +84,8 @@ namespace OpenUtau.App.ViewModels {
         public ObservableCollectionExtended<MenuItemViewModel> LyricBatchEdits { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
         public ObservableCollectionExtended<MenuItemViewModel> ResetBatchEdits { get; private set; }
+            = new ObservableCollectionExtended<MenuItemViewModel>();
+        public ObservableCollectionExtended<MenuItemViewModel> ExternalBatchEdits { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
         public ObservableCollectionExtended<MenuItemViewModel> NotesContextMenuItems { get; private set; }
             = new ObservableCollectionExtended<MenuItemViewModel>();
@@ -93,6 +105,7 @@ namespace OpenUtau.App.ViewModels {
         public ReactiveCommand<PitchPointHitInfo, Unit> PitLinearCommand { get; set; }
         public ReactiveCommand<PitchPointHitInfo, Unit> PitEaseInCommand { get; set; }
         public ReactiveCommand<PitchPointHitInfo, Unit> PitEaseOutCommand { get; set; }
+        public ReactiveCommand<PitchPointHitInfo, Unit> PitSplineCommand { get; set; }
         public ReactiveCommand<PitchPointHitInfo, Unit> PitSnapCommand { get; set; }
         public ReactiveCommand<PitchPointHitInfo, Unit> PitDelCommand { get; set; }
         public ReactiveCommand<PitchPointHitInfo, Unit> PitAddCommand { get; set; }
@@ -101,6 +114,7 @@ namespace OpenUtau.App.ViewModels {
 
         public PianoRollViewModel() {
             NotesViewModel = new NotesViewModel();
+            CurveViewModel = new CurveViewModel();
 
             NoteDeleteCommand = ReactiveCommand.Create<NoteHitInfo>(info => {
                 NotesViewModel.DeleteSelectedNotes();
@@ -135,6 +149,12 @@ namespace OpenUtau.App.ViewModels {
                 DocManager.Inst.ExecuteCmd(new ChangePitchPointShapeCommand(NotesViewModel.Part, info.Note.pitch.data[info.Index], PitchPointShape.o));
                 DocManager.Inst.EndUndoGroup();
             });
+            PitSplineCommand = ReactiveCommand.Create<PitchPointHitInfo>(info => {
+                if (NotesViewModel.Part == null) { return; }
+                DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
+                DocManager.Inst.ExecuteCmd(new ChangePitchPointShapeCommand(NotesViewModel.Part, info.Note.pitch.data[info.Index], PitchPointShape.sp));
+                DocManager.Inst.EndUndoGroup();
+            });
             PitSnapCommand = ReactiveCommand.Create<PitchPointHitInfo>(info => {
                 if (NotesViewModel.Part == null) { return; }
                 DocManager.Inst.StartUndoGroup("command.pitch.editpoint");
@@ -150,7 +170,7 @@ namespace OpenUtau.App.ViewModels {
             PitAddCommand = ReactiveCommand.Create<PitchPointHitInfo>(info => {
                 if (NotesViewModel.Part == null) { return; }
                 DocManager.Inst.StartUndoGroup("command.pitch.add");
-                DocManager.Inst.ExecuteCmd(new AddPitchPointCommand(NotesViewModel.Part, info.Note, new PitchPoint(info.X, info.Y), info.Index + 1));
+                DocManager.Inst.ExecuteCmd(new AddPitchPointCommand(NotesViewModel.Part, info.Note, new PitchPoint(info.X, info.Y, NotePresets.Default.DefaultPitchShape), info.Index + 1));
                 DocManager.Inst.EndUndoGroup();
             });
 
@@ -240,9 +260,30 @@ namespace OpenUtau.App.ViewModels {
 
         public void Undo() => DocManager.Inst.Undo();
         public void Redo() => DocManager.Inst.Redo();
-        public void Cut() => NotesViewModel.CutNotes();
-        public void Copy() => NotesViewModel.CopyNotes();
-        public void Paste() => NotesViewModel.PasteNotes();
+        public void Cut() {
+            if (CurveViewModel.IsSelected(NotesViewModel.PrimaryKey)) {
+                CurveViewModel.Cut(NotesViewModel.Part!);
+            } else {
+                NotesViewModel.CutNotes();
+            }
+        }
+        public void Copy() {
+            if (CurveViewModel.IsSelected(NotesViewModel.PrimaryKey)) {
+                CurveViewModel.Copy(NotesViewModel.Part!);
+            } else {
+                NotesViewModel.CopyNotes();
+            }
+        }
+        public void Paste() {
+            if (DocManager.Inst.NotesClipboard != null && DocManager.Inst.NotesClipboard.Count > 0) {
+                NotesViewModel.PasteNotes();
+            } else if (DocManager.Inst.CurvesClipboard != null && NotesViewModel.Part != null) {
+                var track = NotesViewModel.Project.tracks[NotesViewModel.Part.trackNo];
+                if (track.TryGetExpDescriptor(NotesViewModel.Project, NotesViewModel.PrimaryKey, out var descriptor)) {
+                    CurveViewModel.Paste(NotesViewModel.Part, descriptor);
+                }
+            }
+        }
         public void PastePlain() => NotesViewModel.PastePlainNotes();
         public void Delete() => NotesViewModel.DeleteSelectedNotes();
         public void SelectAll() => NotesViewModel.SelectAllNotes();
@@ -258,7 +299,7 @@ namespace OpenUtau.App.ViewModels {
                 if (PianoRollDetached) {
                     Dispatcher.UIThread.InvokeAsync(() => {
                         Progress = progressBarNotification.Progress;
-                    });
+                    }, DispatcherPriority.Background);
                 }
             }
             SetUndoState();
